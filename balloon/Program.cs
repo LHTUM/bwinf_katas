@@ -7,7 +7,8 @@ namespace balloon
         static void Main()
         {
             // var selector = new ManualSelector();
-            var selector = new AutomaticSelector();
+            // var selector = new AutomaticSelector();
+            var selector = new SimplifiedAutomaticSelector();
 
             selector.Run();
         }

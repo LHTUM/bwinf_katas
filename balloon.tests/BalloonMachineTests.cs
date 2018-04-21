@@ -20,8 +20,8 @@ namespace balloon.tests
 
             _machine.Take(0);
 
-            Assert.IsTrue(_machine.GetCurrentBoxContents()[0] == 0);
-            Assert.IsTrue(_machine.GetCurrentPackageContent() == 1);
+            Assert.IsTrue(_machine.GetBoxContents()[0] == 0);
+            Assert.IsTrue(_machine.GetPackageContent() == 1);
         }
 
         [TestMethod]
@@ -31,9 +31,9 @@ namespace balloon.tests
 
             _machine.Take(1);
 
-            Assert.IsTrue(_machine.GetCurrentBoxContents()[0] == 1);
-            Assert.IsTrue(_machine.GetCurrentBoxContents()[1] == 0);
-            Assert.IsTrue(_machine.GetCurrentPackageContent() == 2);
+            Assert.IsTrue(_machine.GetBoxContents()[0] == 1);
+            Assert.IsTrue(_machine.GetBoxContents()[1] == 0);
+            Assert.IsTrue(_machine.GetPackageContent() == 2);
         }
 
         [TestMethod]
@@ -43,7 +43,7 @@ namespace balloon.tests
             _machine.Take(0);
             _machine.Pack();
 
-            Assert.IsTrue(_machine.GetCurrentPackageContent() == 0);
+            Assert.IsTrue(_machine.GetPackageContent() == 0);
             Assert.IsTrue(_machine.GetPackSizeHistory().Count == 1);
             Assert.IsTrue(_machine.GetPackSizeHistory().Contains(2));
         }
@@ -56,8 +56,8 @@ namespace balloon.tests
             _machine.Take(0);
 
 
-            Assert.IsTrue(_machine.GetCurrentBoxContents()[0] == 1);
-            Assert.IsTrue(_machine.GetCurrentPackageContent() == 2);
+            Assert.IsTrue(_machine.GetBoxContents()[0] == 1);
+            Assert.IsTrue(_machine.GetPackageContent() == 2);
         }
     }
 }

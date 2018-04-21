@@ -15,7 +15,7 @@ namespace balloon.Selectors
             while(!IsFinished())
             {
                 PrintTask();
-                int action = ProvideAction();
+                var action = ProvideAction();
                 if (action == -1)
                 {
                     _machine.Pack();
@@ -30,13 +30,8 @@ namespace balloon.Selectors
 
         public bool IsFinished()
         {
-            if (_machine.HasEmptyBoxes() && _machine.GetCurrentPackageContent() < 20)
-            {
-                return true;
-            }
-            return false;
+            return _machine.HasEmptyBoxes() && _machine.GetPackageContent() < 20;
         }
-
 
         public void SetBalloonMachine(BalloonMachine balloonMachine)
         {
@@ -51,7 +46,7 @@ namespace balloon.Selectors
 
         private int ProvideAction()
         {
-            int selectedBoxIndex = int.MaxValue;
+            var selectedBoxIndex = int.MaxValue;
             while (selectedBoxIndex > _machine.NumberOfBoxes && selectedBoxIndex >= -1)
             {
                 try
