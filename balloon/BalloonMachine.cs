@@ -6,50 +6,52 @@ namespace balloon
 {
     public class BalloonMachine
     {
-        private const int _numberOfBoxes = 10;
-        private int[] _boxes = new int[10];
+        public int NumberOfBoxes = 10;
+        public int Goal = 20;
+        private readonly int[] _boxes = new int[10];
 
-        private List<int> _packSizeHistory { get; set; }
-        private int _currentPackSize { get; set; }
+        private List<int> PackSizeHistory { get; set; }
+        private int CurrentPackSize { get; set; }
         
-        private Stack<int> _unprocessedBalloons;
+        private Queue<int> _unprocessedBalloons;
 
         public BalloonMachine()
         {
-            _packSizeHistory = new List<int>();
-            _unprocessedBalloons = new Stack<int>();
+            PackSizeHistory = new List<int>();
+            _unprocessedBalloons = new Queue<int>();
         }
 
-        public int[] getCurrentBoxContents()
+        public int[] GetCurrentBoxContents()
         {
             return _boxes;
         }
 
         public int GetCurrentPackageContent()
         {
-            return _currentPackSize;
+            return CurrentPackSize;
         }
 
         public List<int> GetPackSizeHistory()
         {
-            return _packSizeHistory;
+            return PackSizeHistory;
         }
 
         public void Pack()
         {
-            _packSizeHistory.Add(_currentPackSize);
-            _currentPackSize = 0;
+            PackSizeHistory.Add(CurrentPackSize);
+            CurrentPackSize = 0;
         }
 
         public void PrintStatistics()
         {
             Dictionary<int, int> packageContentCounts = new Dictionary<int, int>();
             Console.Out.WriteLine("--------------");
-            while(_packSizeHistory.Count>0)
+            Console.Out.WriteLine("Statistics:");
+            while (PackSizeHistory.Count>0)
             {
-                int content = _packSizeHistory.First();
+                int content = PackSizeHistory.First();
                 int count = 0;
-                foreach(int packageContent in _packSizeHistory)
+                foreach(int packageContent in PackSizeHistory)
                 {
                     if(packageContent == content)
                     {
@@ -57,15 +59,34 @@ namespace balloon
                     }
                 }
                 packageContentCounts.Add(content, count);
-                _packSizeHistory.RemoveAll(c => c == content);
+                PackSizeHistory.RemoveAll(c => c == content);
             }
             List<int> counts = new List<int>(packageContentCounts.Keys);
             counts.Sort();
             foreach(int count in counts)
             {
-                Console.Out.WriteLine(count + ":" + packageContentCounts[count]);
+                Console.Out.WriteLine(count + ": " + packageContentCounts[count]);
             }
             Console.Out.WriteLine("--------------");
+        }
+
+        public void PrintCurrentStatus()
+        {
+            Console.Out.WriteLine("Current Status:");
+            Console.Out.WriteLine("--------------");
+            Console.Out.WriteLine("Box contents: " + GetBoxContentsAsString());
+            Console.Out.WriteLine("Package content:" + GetCurrentPackageContent());
+            Console.Out.WriteLine("--------------");
+        }
+
+        private string GetBoxContentsAsString()
+        {
+            string s = "";
+            foreach(int content in _boxes)
+            {
+                s += ", " + content;
+            }
+            return s.Substring(2,s.Length-2);
         }
 
         public void Take(int boxIndex)
@@ -73,8 +94,8 @@ namespace balloon
             int boxContent = _boxes[boxIndex];
             try
             {
-                _currentPackSize += boxContent;
-                _boxes[boxIndex] = _unprocessedBalloons.Pop();
+                CurrentPackSize += boxContent;
+                _boxes[boxIndex] = _unprocessedBalloons.Dequeue();
             } catch
             {
                 _boxes[boxIndex] = 0;
@@ -93,6 +114,33 @@ namespace balloon
                     }
                 }
             }
+        }
+
+        public void SetBalloonQueue(int[] balloons)
+        {
+            _unprocessedBalloons = new Queue<int>();
+            foreach (var ballonCount in balloons)
+            {
+                _unprocessedBalloons.Enqueue(ballonCount);
+            }
+
+            if (!HasEmptyBoxes()) return;
+            for (var i = 0; i < NumberOfBoxes; i++)
+            {
+                Take(i);
+            }
+        }
+
+        public bool HasEmptyBoxes()
+        {
+            foreach(int boxContent in _boxes)
+            {
+                if (boxContent != 0)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

@@ -1,12 +1,15 @@
-﻿using System;
+﻿using balloon.Selectors;
 
 namespace balloon
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            Console.WriteLine("Hello World!");
+            // var selector = new ManualSelector();
+            var selector = new AutomaticSelector();
+
+            selector.Run();
         }
     }
 }
