@@ -3,7 +3,7 @@
     public interface ISelector
     {
         void Run();
-        int ProvideAction();
+        int ProvideBox();
         bool IsFinished();
         void SetBalloonMachine(BalloonMachine balloonMachine);
     }

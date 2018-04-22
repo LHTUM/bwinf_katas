@@ -24,12 +24,12 @@ namespace balloon
         public void Take(int boxIndex)
         {
             var boxContent = _boxContents[boxIndex];
-            try
-            {
                 _packageContent += boxContent;
+            if (_unprocessedBalloons.Count > 0)
+            {
                 _boxContents[boxIndex] = _unprocessedBalloons.Dequeue();
             }
-            catch
+            else
             {
                 _boxContents[boxIndex] = 0;
             }

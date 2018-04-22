@@ -25,7 +25,7 @@ namespace balloon.Selectors
                     }
                     else
                     {
-                        int action = ProvideAction();
+                        int action = ProvideBox();
                         _machine.Take(action);
                     }
                 }
@@ -35,7 +35,7 @@ namespace balloon.Selectors
             Console.In.Read();
         }
 
-        public int ProvideAction()
+        public int ProvideBox()
         {
             var possible = new bool[10,
                 _machine.GetBoxContents().Aggregate((a, b) => a >= _machine.Goal ? a : a + b) + 1];

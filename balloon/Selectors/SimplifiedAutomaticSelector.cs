@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace balloon.Selectors
@@ -8,87 +7,83 @@ namespace balloon.Selectors
     public class SimplifiedAutomaticSelector : ISelector
     {
         private BalloonMachine _machine;
+        private bool[,] _possiblePackageContents;
 
         public void Run()
         {
-            for (var i = 1; i < 8; i++)
+            while (!IsFinished())
             {
-                _machine = new BalloonMachine();
-                _machine.SetBalloonQueue(Array.ConvertAll(
-                    File.ReadAllLines(@"C:\code\priv\dojos\balloon\balloon\Inputs\luftballons" + i + ".txt"), int.Parse));
-                while (!IsFinished())
+                if (_machine.GetPackageContent() >= _machine.Goal)
                 {
-                    if (_machine.GetPackageContent() >= 20)
-                    {
-                        _machine.Pack();
-                        _machine.Goal = 20;
-                    }
-                    else
-                    {
-                        int action = ProvideAction();
-                        _machine.Take(action);
-                    }
+                    _machine.Pack();
                 }
-                Console.Out.WriteLine("File: " + i);
-                _machine.PrintStatistics();
+                else
+                {
+                    var box = ProvideBox();
+                    _machine.Take(box);
+                }
             }
-            Console.In.Read();
         }
 
-        public int ProvideAction()
+        public int ProvideBox()
         {
-            var goal = _machine.Goal - _machine.GetPackageContent();
-            var accumulatedBoxesContent = _machine.GetBoxContents().Sum();
-            var achievablePackages = new bool[_machine.NumberOfBoxes, accumulatedBoxesContent+1]; // rows: intended sum, cols: included boxes
-            if (accumulatedBoxesContent < goal)
+            var missingContent = _machine.Goal - _machine.GetPackageContent();
+            var accumulatedBoxContents = _machine.GetBoxContents().Sum();
+            if (accumulatedBoxContents < missingContent)
             {
-                return (Array.IndexOf(_machine.GetBoxContents(),_machine.GetBoxContents().Where(a => a > 0).Min()));
+                return (GetIndexOfSmallestNonZeroEntry(_machine.GetBoxContents()));
             }
-            for (var includedBoxes = 0; includedBoxes < _machine.NumberOfBoxes; includedBoxes++)
-            for (var intendedPackageContent = 0; intendedPackageContent <= accumulatedBoxesContent; intendedPackageContent++)
+            
+            _possiblePackageContents = new bool[_machine.NumberOfBoxes, accumulatedBoxContents+1]; // rows: included boxes, cols: intended sum 
+            for (var i = 0; i < _machine.NumberOfBoxes; i++)
             {
-                var currentBoxConent = _machine.GetBoxContents()[includedBoxes];
-                achievablePackages[includedBoxes, intendedPackageContent] = currentBoxConent == intendedPackageContent;
-                    if(achievablePackages[includedBoxes, intendedPackageContent]) continue;
-                if (includedBoxes > 0)
+                for (var intendedPackageContent = 0;
+                    intendedPackageContent <= accumulatedBoxContents;
+                    intendedPackageContent++)
                 {
-                    achievablePackages[includedBoxes, intendedPackageContent] =
-                        achievablePackages[includedBoxes - 1, intendedPackageContent] ||
-                        (intendedPackageContent - currentBoxConent) >= 0 && achievablePackages[includedBoxes - 1,
-                            intendedPackageContent - currentBoxConent];
+                    var currentBoxConent = _machine.GetBoxContents()[i];
+                    var includedBoxes = i;
+                    if (currentBoxConent == intendedPackageContent ||
+                        i > 0 && (IsPossibleWithoutCurrentBox(i, intendedPackageContent) ||
+                        intendedPackageContent > currentBoxConent && IsPossibleWithoutCurrentBox(i, intendedPackageContent - currentBoxConent)))
+                    {
+                        _possiblePackageContents[includedBoxes, intendedPackageContent] = true;
+                    }
                 }
             }
 
-            var bestPackageContent = accumulatedBoxesContent;
-            for (var i = goal; i <= accumulatedBoxesContent; i++)
+            var bestPackageContent = accumulatedBoxContents;
+            for (var i = missingContent; i <= accumulatedBoxContents; i++)
             {
-                if (achievablePackages[_machine.NumberOfBoxes - 1, i])
+                if (_possiblePackageContents[_machine.NumberOfBoxes - 1, i])
                 {
                     bestPackageContent = i;
                     break;
                 }
             }
 
+            var missingContentForBestPackage = bestPackageContent;
             var usedBoxes = new List<int>();
-            for (var i = 9; i >= 0; i--)
+            for (var i = _machine.NumberOfBoxes-1; i >= 0; i--)
             {
                 var currentBoxContent = _machine.GetBoxContents()[i];
-                if (currentBoxContent == bestPackageContent)
+
+                if (currentBoxContent == missingContentForBestPackage)
                 {
                     usedBoxes.Add(i);
                     break;
                 }
 
-                if (i == 0 || !achievablePackages[i - 1, bestPackageContent])
+                if (i == 0 || !IsPossibleWithoutCurrentBox(i, missingContentForBestPackage))
                 {
                     usedBoxes.Add(i);
-                    bestPackageContent -= currentBoxContent;
+                    missingContentForBestPackage -= currentBoxContent;
                 }
             }
 
             if (usedBoxes.Count == 0)
             {
-                usedBoxes.Add(Array.IndexOf(_machine.GetBoxContents(), _machine.GetBoxContents().Where(i => i> 0).Min()));
+                usedBoxes.Add(GetIndexOfSmallestNonZeroEntry(_machine.GetBoxContents()));
             }
             return (Array.IndexOf(_machine.GetBoxContents(), usedBoxes.Select(i => _machine.GetBoxContents()[i]).Min()));
         }
@@ -102,6 +97,16 @@ namespace balloon.Selectors
         public void SetBalloonMachine(BalloonMachine balloonMachine)
         {
             _machine = balloonMachine;
+        }
+
+        private int GetIndexOfSmallestNonZeroEntry(int[] array)
+        {
+            return Array.IndexOf(array, array.Where(entry => entry > 0).Min());
+        }
+
+        private bool IsPossibleWithoutCurrentBox(int currentBoxIndex, int intendetContent)
+        {
+            return _possiblePackageContents[currentBoxIndex - 1, intendetContent];
         }
     }
 }
