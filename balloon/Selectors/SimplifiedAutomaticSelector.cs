@@ -91,7 +91,7 @@ namespace balloon.Selectors
 
         public bool IsFinished()
         {
-            return _machine.HasEmptyBoxes() && _machine.GetPackageContent() < 20;
+            return _machine.HasEmptyBoxes() && _machine.GetPackageContent() < _machine.Goal;
         }
 
         public void SetBalloonMachine(BalloonMachine balloonMachine)
