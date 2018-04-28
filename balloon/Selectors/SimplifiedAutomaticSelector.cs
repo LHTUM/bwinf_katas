@@ -31,7 +31,11 @@ namespace balloon.Selectors
         }
 
         public int ProvideBox()
-        {   
+        {
+            
+            DetermineMissingContent();
+            DetermineAccumulatedBoxContents();
+
             if (_accumulatedBoxContents < _missingContent)
             {
                 return GetIndexOfBoxWithSmallestNonZeroContent();
@@ -42,6 +46,16 @@ namespace balloon.Selectors
             var usedBoxes = DetermineUsedBoxes(bestPackageContent);
             var boxIndex = DetermineBestBoxIndex(usedBoxes);
             return (boxIndex);
+        }
+
+        private void DetermineAccumulatedBoxContents()
+        {
+            _accumulatedBoxContents = _machine.GetBoxContents().Sum();
+        }
+
+        private void DetermineMissingContent()
+        {
+            _missingContent = _machine.Goal - _machine.GetPackageContent();
         }
 
         private int GetIndexOfBoxWithSmallestNonZeroContent()
@@ -107,7 +121,7 @@ namespace balloon.Selectors
             for (var i = 0; i < _machine.NumberOfBoxes; i++)
             {
                 for (var intendedPackageContent = 0;
-                    intendedPackageContent <= maximum;
+                    intendedPackageContent < maximum;
                     intendedPackageContent++)
                 {
                     var currentBoxConent = _machine.GetBoxContents()[i];
@@ -131,8 +145,6 @@ namespace balloon.Selectors
         public void SetBalloonMachine(BalloonMachine balloonMachine)
         {
             _machine = balloonMachine;
-            _missingContent = _machine.Goal - _machine.GetPackageContent();
-            _accumulatedBoxContents = _machine.GetBoxContents().Sum();
         }
 
         public static int GetIndexOfSmallestNonZeroEntry(int[] array)
