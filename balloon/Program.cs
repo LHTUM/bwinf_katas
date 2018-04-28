@@ -6,26 +6,43 @@ namespace balloon
 {
     public class Program
     {
-        static void Main()
+        private static BalloonMachine _balloonMachine;
+        private static SimplifiedAutomaticSelector _selector;
+
+        private static void Main()
         {
-            var balloonMachine = new BalloonMachine();
-            var selector = new SimplifiedAutomaticSelector();
-            // var selector = new ManualSelector();
-            // var selector = new AutomaticSelector();
+            _balloonMachine = new BalloonMachine();
+            _selector = new SimplifiedAutomaticSelector();
 
             for (var i = 1; i < 8; i++)
             {
-                var inputSequence =
-                    ReadSequenceFromFile(@"C:\code\priv\dojos\balloon\balloon\Inputs\luftballons" + i + ".txt");
-
-                balloonMachine.SetBalloonQueue(inputSequence);
-                selector.SetBalloonMachine(balloonMachine);
-
-                Console.Out.WriteLine("File - " + i + " :");
-                selector.Run();
-                balloonMachine.PrintStatistics();
+                var inputSequence = ReadSequence(i);
+                ExecuteSequence(inputSequence, _selector);
+                PrintExecutionStatistics(i);
             }
             Console.In.Read();
+        }
+
+
+        private static int[] ReadSequence(int i)
+        {
+            return ReadSequenceFromFile(@"C:\code\priv\dojos\balloon\balloon\Inputs\luftballons" + i + ".txt");
+        }
+
+        private static void ExecuteSequence(int[] inputSequence, ISelector selector)
+        {
+            _balloonMachine.SetBalloonQueue(inputSequence);
+            selector.SetBalloonMachine(_balloonMachine);
+            while (!selector.IsFinished())
+            {
+                selector.ExecuteStep();
+            }
+        }
+
+        private static void PrintExecutionStatistics(int i)
+        {
+            Console.Out.WriteLine("File - " + i + " :");
+            _balloonMachine.PrintStatistics();
         }
 
         private static int[] ReadSequenceFromFile(string uri)

@@ -9,26 +9,29 @@ namespace balloon.Selectors
         private BalloonMachine _machine;
         private bool[,] _possiblePackageContents;
 
-        public void Run()
+        public void ExecuteStep()
         {
-            while (!IsFinished())
-            {
-                if (_machine.GetPackageContent() >= _machine.Goal)
+            if (IsReadyToPack())
                 {
                     _machine.Pack();
                 }
-                else
-                {
-                    var box = ProvideBox();
-                    _machine.Take(box);
-                }
+            else
+            {
+                var box = ProvideBox();
+                _machine.Take(box);
             }
+        }
+
+        private bool IsReadyToPack()
+        {
+            return _machine.GetPackageContent() >= _machine.Goal;
         }
 
         public int ProvideBox()
         {
             var missingContent = _machine.Goal - _machine.GetPackageContent();
             var accumulatedBoxContents = _machine.GetBoxContents().Sum();
+
             if (accumulatedBoxContents < missingContent)
             {
                 return (GetIndexOfSmallestNonZeroEntry(_machine.GetBoxContents()));
@@ -87,7 +90,6 @@ namespace balloon.Selectors
             }
             return (Array.IndexOf(_machine.GetBoxContents(), usedBoxes.Select(i => _machine.GetBoxContents()[i]).Min()));
         }
-
 
         public bool IsFinished()
         {

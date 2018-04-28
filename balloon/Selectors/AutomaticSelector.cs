@@ -79,6 +79,11 @@ namespace balloon.Selectors
         }
 
 
+        public void ExecuteStep()
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsFinished()
         {
             return _machine.HasEmptyBoxes() && _machine.GetPackageContent() < 20;
