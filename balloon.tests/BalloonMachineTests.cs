@@ -16,7 +16,7 @@ namespace balloon.tests
         [TestMethod]
         public void Take_FirstFilledBox_EmptyBoxAndFilledPackage()
         {
-            _machine.SetBoxContents(new int[] {1});
+            _machine.SetBoxContents(new [] {1});
 
             _machine.Take(0);
 
@@ -27,7 +27,7 @@ namespace balloon.tests
         [TestMethod]
         public void Take_FilledFirstAndSecondBox_FilledFirstAndEmptySecondBoxAndFilledPackage()
         {
-            _machine.SetBoxContents(new int[] { 1, 2 });
+            _machine.SetBoxContents(new [] { 1, 2 });
 
             _machine.Take(1);
 
