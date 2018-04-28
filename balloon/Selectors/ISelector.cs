@@ -2,8 +2,7 @@
 {
     public interface ISelector
     {
-        void Run();
-        int ProvideBox();
+        void ExecuteStep();
         bool IsFinished();
         void SetBalloonMachine(BalloonMachine balloonMachine);
     }
